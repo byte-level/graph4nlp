@@ -528,11 +528,21 @@ class Dataset(torch.utils.data.Dataset):
         if static_or_dynamic not in ["static", "dynamic"]:
             raise ValueError("Argument: ``static_or_dynamic`` must be ``static`` or ``dynamic``")
         ret = []
-        if static_or_dynamic == "static":
-            print("Connecting to stanfordcorenlp server...")
-            processor = stanfordcorenlp.StanfordCoreNLP(
-                "http://localhost", port=port, timeout=timeout
-            )
+        if static_or_dynamic == "static" or static_or_dynamic == "static_custom":
+            if static_or_dynamic == "static_custom":
+                processor_args = {
+                    "annotators": "ssplit,tokenize,depparse",
+                    "tokenize.options": "splitHyphenated=false,normalizeParentheses=false,"
+                                        "normalizeOtherBrackets=false",
+                    "tokenize.whitespace": True,
+                    "ssplit.isOneSentence": True,
+                    "outputFormat": "json",
+                }
+            else:
+                print("Connecting to stanfordcorenlp server...")
+                processor = stanfordcorenlp.StanfordCoreNLP(
+                    "http://localhost", port=port, timeout=timeout
+                )
 
             if topology_builder == IEBasedGraphConstruction:
                 props_coref = {
